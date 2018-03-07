@@ -52,6 +52,9 @@
 # [*extra_pip_args*]
 #  Extra arguments to pass to pip after requirements file.  Default: blank
 #
+# [*manage_requirements*]
+# Create the requirements file if it doesn't exist. Default: true
+#
 # === Examples
 #
 # python::virtualenv { '/var/www/project1':
@@ -69,23 +72,24 @@
 # Shiva Poudel
 #
 define python::virtualenv (
-  $ensure           = present,
-  $version          = 'system',
-  $requirements     = false,
-  $systempkgs       = false,
-  $venv_dir         = $name,
-  $distribute       = true,
-  $index            = false,
-  $owner            = 'root',
-  $group            = 'root',
-  $mode             = '0755',
-  $proxy            = false,
-  $environment      = [],
-  $path             = [ '/bin', '/usr/bin', '/usr/sbin', '/usr/local/bin' ],
-  $cwd              = undef,
-  $timeout          = 1800,
-  $extra_pip_args   = '',
-  $virtualenv       = undef
+  $ensure                = present,
+  $version               = 'system',
+  $requirements          = false,
+  $systempkgs            = false,
+  $venv_dir              = $name,
+  $distribute            = true,
+  $index                 = false,
+  $owner                 = 'root',
+  $group                 = 'root',
+  $mode                  = '0755',
+  $proxy                 = false,
+  $environment           = [],
+  $path                  = [ '/bin', '/usr/bin', '/usr/sbin', '/usr/local/bin' ],
+  $cwd                   = undef,
+  $timeout               = 1800,
+  $extra_pip_args        = '',
+  $manage_requirements   = true,
+  $virtualenv            = undef
 ) {
   include ::python
 
@@ -181,14 +185,15 @@ define python::virtualenv (
       }
 
       python::requirements { "${requirements}_${venv_dir}":
-        requirements   => $requirements,
-        virtualenv     => $venv_dir,
-        proxy          => $proxy,
-        owner          => $owner,
-        group          => $group,
-        cwd            => $cwd,
-        require        => Exec["python_virtualenv_${venv_dir}"],
-        extra_pip_args => $extra_pip_args,
+        requirements        => $requirements,
+        virtualenv          => $venv_dir,
+        proxy               => $proxy,
+        manage_requirements => $manage_requirements,
+        owner               => $owner,
+        group               => $group,
+        cwd                 => $cwd,
+        require             => Exec["python_virtualenv_${venv_dir}"],
+        extra_pip_args      => $extra_pip_args,
       }
     }
   } elsif $ensure == 'absent' {
